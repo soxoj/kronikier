@@ -1,0 +1,54 @@
+# Well-known relative paths to probe via web.archive.org's availability API.
+#
+# One path per line. Lines starting with `#` and blank lines are ignored.
+# Whitespace around each entry is trimmed. Each path must start with `/`.
+# Duplicates are silently dropped (first occurrence wins).
+#
+# Non-ASCII (cyrillic / accented) paths belong here because the server-side
+# CDX urlkey filter can't match URL-encoded bytes cleanly; the probe stage
+# covers those directly via the availability API.
+#
+# Note: every entry costs N HTTP requests at scan time, where N is the
+# number of probe timestamps (currently 5: 1999, 2005, 2010, 2015, 2020).
+# Keep this list focused — bigger = slower probe phase and harder on IA.
+
+# Homepage / root
+/
+
+# English — contact
+/contact
+/contacts
+/contact.html
+/contacts.html
+/contact.htm
+/contacts.htm
+/contact-us
+/contact-us.html
+/contact.php
+/contacts.php
+
+# English — about / company / team
+/about
+/about.html
+/about-us
+/about-us.html
+/company
+/team
+
+# English — legal / index / footer
+/imprint
+/impressum
+/index.html
+/footer.html
+
+# Russian (transliterated)
+/kontakty
+/kontakty.html
+/o-nas
+/o-kompanii
+/rekvizity
+
+# Russian (cyrillic)
+/контакты
+/о-нас
+/о-компании

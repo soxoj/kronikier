@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kronieker"
+version = "0.1.0"
+description = "OSINT tool: pull historical email/phone contacts for a domain from web.archive.org snapshots"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Soxoj" }]
+dependencies = [
+    "requests>=2.31",
+    "beautifulsoup4>=4.12",
+    "phonenumbers>=8.13",
+    "rich>=13.7",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+    "pytest-cov>=4",
+    "responses>=0.25",
+]
+
+[project.scripts]
+kronieker = "kronieker.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["kronieker*"]
+
+[tool.setuptools.package-data]
+kronieker = ["data/*.txt"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "e2e: end-to-end tests that hit the live web.archive.org API (slow, requires network)",
+]
+addopts = "-ra --strict-markers"

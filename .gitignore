@@ -1,0 +1,30 @@
+# ---- Scan outputs (analyst data — never commit) ----
+# CSV reports + targets-file inputs live at repo root by default; both can
+# carry confidential investigation data. Bundled data under kronieker/data/
+# stays trackable because these patterns are anchored to the root only.
+/*.csv
+/*.txt
+
+# ---- Python build / cache ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+.eggs/
+build/
+dist/
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# ---- Virtual envs ----
+.venv/
+venv/
+env/
+
+# ---- IDE ----
+.vscode/
+.idea/
+*.swp
+.DS_Store
