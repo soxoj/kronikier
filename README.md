@@ -5,6 +5,8 @@ domain out of **web.archive.org** snapshots. Built for investigations
 where the current site no longer shows contact details (or shows
 different ones) but earlier versions are preserved in the archive.
 
+[![asciicast](https://github.com/user-attachments/assets/bc24bdd0-f483-41f5-82ae-cb0418f72389)](https://asciinema.org/a/kZErdPENZJlnSEjA)
+
 **Full docs:** [docs/USAGE.md](docs/USAGE.md) ·
 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
