@@ -3,7 +3,7 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "kronieker"
+name = "kronikier"
 version = "0.1.0"
 description = "OSINT tool: pull historical email/phone contacts for a domain from web.archive.org snapshots"
 readme = "README.md"
@@ -25,14 +25,14 @@ dev = [
 ]
 
 [project.scripts]
-kronieker = "kronieker.cli:main"
+kronikier = "kronikier.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["kronieker*"]
+include = ["kronikier*"]
 
 [tool.setuptools.package-data]
-kronieker = ["data/*.txt"]
+kronikier = ["data/*.txt"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

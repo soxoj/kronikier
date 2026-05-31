@@ -6,7 +6,7 @@ them ideal cache material: rerunning a scan (to tweak extractor regions,
 re-render output, debug a contact filter) does not need to hit IA again.
 
 **Layout** — one HTML file per snapshot under
-``$XDG_CACHE_HOME/kronieker/snapshots/``::
+``$XDG_CACHE_HOME/kronikier/snapshots/``::
 
     <cache_dir>/
         example.com/
@@ -40,8 +40,8 @@ import threading
 from pathlib import Path
 from urllib.parse import urlparse
 
-from kronieker.cdx import Snapshot
-from kronieker.fetcher import FetchedPage
+from kronikier.cdx import Snapshot
+from kronikier.fetcher import FetchedPage
 
 log = logging.getLogger(__name__)
 
@@ -49,15 +49,15 @@ log = logging.getLogger(__name__)
 def default_cache_dir() -> Path:
     """Resolve the on-disk cache root.
 
-    Precedence: ``KRONIEKER_CACHE_DIR`` env > ``XDG_CACHE_HOME/kronieker/snapshots``
-    > ``~/.cache/kronieker/snapshots``.
+    Precedence: ``KRONIEKER_CACHE_DIR`` env > ``XDG_CACHE_HOME/kronikier/snapshots``
+    > ``~/.cache/kronikier/snapshots``.
     """
     override = os.environ.get("KRONIEKER_CACHE_DIR")
     if override:
         return Path(override)
     xdg = os.environ.get("XDG_CACHE_HOME")
     base = Path(xdg) if xdg else Path.home() / ".cache"
-    return base / "kronieker" / "snapshots"
+    return base / "kronikier" / "snapshots"
 
 
 # Anything outside this set is replaced with ``_`` when building a filename.

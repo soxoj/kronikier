@@ -6,9 +6,9 @@ from pathlib import Path
 
 import pytest
 
-from kronieker.cache import SnapshotCache, default_cache_dir
-from kronieker.cdx import Snapshot
-from kronieker.fetcher import FetchedPage
+from kronikier.cache import SnapshotCache, default_cache_dir
+from kronikier.cdx import Snapshot
+from kronikier.fetcher import FetchedPage
 
 
 def _snap(ts="20200101000000", url="http://example.com/contact") -> Snapshot:
@@ -26,7 +26,7 @@ def _page(snap=None, status=200, content="<html>info@x</html>", error=None) -> F
 
 
 class TestDefaultCacheDir:
-    def test_kronieker_cache_dir_env_takes_precedence(self, tmp_path, monkeypatch):
+    def test_kronikier_cache_dir_env_takes_precedence(self, tmp_path, monkeypatch):
         monkeypatch.setenv("KRONIEKER_CACHE_DIR", str(tmp_path / "custom"))
         monkeypatch.setenv("XDG_CACHE_HOME", str(tmp_path / "xdg"))
         assert default_cache_dir() == tmp_path / "custom"
@@ -34,13 +34,13 @@ class TestDefaultCacheDir:
     def test_xdg_cache_home_fallback(self, tmp_path, monkeypatch):
         monkeypatch.delenv("KRONIEKER_CACHE_DIR", raising=False)
         monkeypatch.setenv("XDG_CACHE_HOME", str(tmp_path / "xdg"))
-        assert default_cache_dir() == tmp_path / "xdg" / "kronieker" / "snapshots"
+        assert default_cache_dir() == tmp_path / "xdg" / "kronikier" / "snapshots"
 
     def test_home_cache_default(self, tmp_path, monkeypatch):
         monkeypatch.delenv("KRONIEKER_CACHE_DIR", raising=False)
         monkeypatch.delenv("XDG_CACHE_HOME", raising=False)
         monkeypatch.setattr(Path, "home", classmethod(lambda cls: tmp_path))
-        assert default_cache_dir() == tmp_path / ".cache" / "kronieker" / "snapshots"
+        assert default_cache_dir() == tmp_path / ".cache" / "kronikier" / "snapshots"
 
 
 class TestSnapshotCacheRoundtrip:
@@ -154,7 +154,7 @@ class TestFetcherIntegration:
     """
 
     def test_cache_hit_skips_http(self, tmp_path, monkeypatch):
-        from kronieker.fetcher import fetch_snapshots
+        from kronikier.fetcher import fetch_snapshots
 
         cache = SnapshotCache(tmp_path)
         snap = _snap()
@@ -166,7 +166,7 @@ class TestFetcherIntegration:
             http_calls["n"] += 1
             raise AssertionError("HTTP fetch should never run for a cache hit")
 
-        monkeypatch.setattr("kronieker.fetcher._fetch_one", fail_if_called)
+        monkeypatch.setattr("kronikier.fetcher._fetch_one", fail_if_called)
 
         pages = list(fetch_snapshots([snap], rate_limit_per_sec=0, cache=cache))
         assert len(pages) == 1
@@ -175,7 +175,7 @@ class TestFetcherIntegration:
         assert cache.hits == 1
 
     def test_cache_miss_does_http_and_persists(self, tmp_path, monkeypatch):
-        from kronieker.fetcher import fetch_snapshots
+        from kronikier.fetcher import fetch_snapshots
 
         cache = SnapshotCache(tmp_path)
         snap = _snap()
@@ -186,7 +186,7 @@ class TestFetcherIntegration:
             http_calls["n"] += 1
             return FetchedPage(snap, 200, "<html>fresh</html>")
 
-        monkeypatch.setattr("kronieker.fetcher._fetch_one", fake_fetch)
+        monkeypatch.setattr("kronikier.fetcher._fetch_one", fake_fetch)
 
         pages = list(fetch_snapshots([snap], rate_limit_per_sec=0, cache=cache))
         assert len(pages) == 1
@@ -197,14 +197,14 @@ class TestFetcherIntegration:
         assert cache.get(snap).content == "<html>fresh</html>"
 
     def test_cache_None_means_no_caching(self, tmp_path, monkeypatch):
-        from kronieker.fetcher import fetch_snapshots
+        from kronikier.fetcher import fetch_snapshots
 
         snap = _snap()
 
         def fake_fetch(snap, session, timeout, retries):
             return FetchedPage(snap, 200, "<html>x</html>")
 
-        monkeypatch.setattr("kronieker.fetcher._fetch_one", fake_fetch)
+        monkeypatch.setattr("kronikier.fetcher._fetch_one", fake_fetch)
 
         pages = list(fetch_snapshots([snap], rate_limit_per_sec=0, cache=None))
         assert len(pages) == 1
@@ -216,7 +216,7 @@ class TestCliIntegration:
     """End-to-end through ``cli.main``."""
 
     def _calibration(self):
-        from kronieker.calibration import Calibration, CALIBRATION_VERSION
+        from kronikier.calibration import Calibration, CALIBRATION_VERSION
         return Calibration(
             version=CALIBRATION_VERSION, avg_latency_s=0.42, sample_count=8,
             last_calibrated_at="2026-01-01T00:00:00+00:00",
@@ -224,7 +224,7 @@ class TestCliIntegration:
         )
 
     def test_clear_cache_flag_wipes_and_exits(self, tmp_path, monkeypatch, capsys):
-        from kronieker import cli
+        from kronikier import cli
 
         monkeypatch.setenv("KRONIEKER_CACHE_DIR", str(tmp_path / "cache"))
         # Pre-populate.
@@ -243,8 +243,8 @@ class TestCliIntegration:
         assert SnapshotCache(tmp_path / "cache").size() == 0
 
     def test_no_cache_flag_disables_cache(self, tmp_path, monkeypatch, capsys):
-        from kronieker import cli
-        from kronieker.pipeline import ScanResult
+        from kronikier import cli
+        from kronikier.pipeline import ScanResult
 
         monkeypatch.setenv("KRONIEKER_CACHE_DIR", str(tmp_path / "cache"))
 

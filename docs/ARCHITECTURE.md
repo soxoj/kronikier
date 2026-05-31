@@ -1,6 +1,6 @@
 # Architecture
 
-`kronieker` is an OSINT tool that mines the Internet Archive's
+`kronikier` is an OSINT tool that mines the Internet Archive's
 historical snapshots of a given domain for contact data (emails and phone
 numbers). It exists for one asymmetric scenario: **the current site has
 nothing useful, but the wayback machine still holds what was there
@@ -22,7 +22,7 @@ see [USAGE.md](USAGE.md).
                                              │
                           ┌──────────────────▼───────────────┐
                           │ Calibration (load or run)        │
-                          │  • ~/.cache/kronieker/cal.json   │
+                          │  • ~/.cache/kronikier/cal.json   │
                           │  • avg_latency_s                 │
                           └──────────────────┬───────────────┘
                                              │
@@ -102,7 +102,7 @@ see [USAGE.md](USAGE.md).
 | `fetcher.py`             | Concurrent snapshot downloader with a global rate limit and an optional **deadline** kwarg. Streams input lazily; once the deadline passes no new fetches are submitted, but in-flight requests are allowed to finish. Retries 404/429/5xx. Cache-aware: hits are yielded synchronously without touching the executor or the rate-limit token, misses write back through worker threads. |
 | `cache.py`               | File-per-snapshot disk cache. SHA-1-prefixed filename layout `{ts}__{path}__{hash}.html` makes entries browsable on disk and survives URL-sanitisation collisions. Snapshots are immutable so there's no TTL. Only `200 OK` HTML responses persist — errors and 4xx are intentionally re-checked next run. Best-effort: any IO error logs and reads as a miss, never blocks the scan. |
 | `extractors.py`          | Email + phone extraction. HTML-entity decode, Cloudflare cfemail unwrap, `mailto:` / `tel:` href harvest, `[at]/[dot]` deobfuscation (English + Russian), libphonenumber via hybrid leniency. Pass 1 (`+`-required, POSSIBLE) catches international-format numbers including site-side typos; Pass 2 (region-by-region, VALID) catches bare locals with position-based dedup so each substring is parsed once by the highest-priority region. 4-digit-year dates (`02.09.2008`) are filtered out — they have phone-shaped digit runs but obviously aren't phones. |
-| `calibration.py`         | Per-machine latency calibration. Fetches 8 canonical wayback snapshots, measures avg/p50/p95, persists to `$XDG_CACHE_HOME/kronieker/calibration.json` (14-day TTL). Falls back to a conservative `DEFAULT_AVG_LATENCY_S = 0.6` when too few fixture fetches succeed. |
+| `calibration.py`         | Per-machine latency calibration. Fetches 8 canonical wayback snapshots, measures avg/p50/p95, persists to `$XDG_CACHE_HOME/kronikier/calibration.json` (14-day TTL). Falls back to a conservative `DEFAULT_AVG_LATENCY_S = 0.6` when too few fixture fetches succeed. |
 | `planner.py`             | Computes a `ScanPlan` from `(timeout, workers, rate, calibration, --all)`. Decides whether to apply the contact-URL filter (drops it when the whole site fits the timeout), what `cdx_limit` to ask for, and what the absolute monotonic deadline is. Preflight uses `show_num_pages` and (for `pages ≤ 2`) `count_captures` to pin the actual capture count, which often flips small sites from "filter on" to "scan everything". |
 | `pipeline.py`            | The orchestrator. Runs the plan via a unified producer-consumer `_scan` with deadline plumbing, threaded CDX iteration with a wall-clock sub-budget, smart probe-skip inference, and zero-result escalation (one shot). Accepts `extra_well_known_paths` to merge per-target probe hints from `--targets-file`, and `single_url` to switch to one-URL-across-time mode. Carries plan metadata into `ScanResult` for the CLI/JSON layer. |
 | `progress_ui.py`         | A thin wrapper around `rich.progress.Progress`. Adds a timeout-countdown column (`Ns left / Ms`), status lines, the live per-contact feed (`-v` adds date + URL beneath), and a daemon heartbeat thread that keeps the countdown ticking even during silent CDX waits. No-op when `enabled=False`. |
@@ -174,7 +174,7 @@ The first ever invocation runs a one-time latency calibration: 8 canonical
 wayback snapshots (`example.com`, `iana.org`, `www.w3.org`, etc. at pinned
 historical timestamps) are fetched in parallel through the production
 `_fetch_one` path. The mean is persisted as JSON to
-`$XDG_CACHE_HOME/kronieker/calibration.json` with a 14-day TTL.
+`$XDG_CACHE_HOME/kronikier/calibration.json` with a 14-day TTL.
 
 Real-run timings from production scans are **not** folded back into the
 cache — a single slow domain would skew the fixture-based average. Each
@@ -415,7 +415,7 @@ invalidation. Layout: one file per `(timestamp, original_url)`, grouped
 by host:
 
 ```
-~/.cache/kronieker/snapshots/
+~/.cache/kronikier/snapshots/
 └── theranos.com/
     └── 20140902120000__contact-us__a3f9d4e1.html
 ```
@@ -561,7 +561,7 @@ Empty results never produce a CSV file or a blank table — the CLI prints
   boundary: partial sightings are preserved on the returned
   `ScanResult` (`interrupted=True`), the CLI writes the CSV before
   exit, and `main()` returns exit code 130.
-- The IA User-Agent (`kronieker/0.1 (+https://github.com/soxoj/kronieker)`)
+- The IA User-Agent (`kronikier/0.1 (+https://github.com/soxoj/kronikier)`)
   is sent on every request for transparency.
 - No data is sent anywhere except web.archive.org / archive.org.
 

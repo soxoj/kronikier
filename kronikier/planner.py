@@ -6,7 +6,7 @@ Replaces the old mode-name routing (``--auto/--default/--deep/--exhaustive``).
 
 The planner only computes numbers — no HTTP I/O of its own beyond the single
 ``show_num_pages`` meta-call. All side effects (status prints) flow through
-the :class:`~kronieker.progress_ui.ProgressUI` passed in.
+the :class:`~kronikier.progress_ui.ProgressUI` passed in.
 """
 
 from __future__ import annotations
@@ -17,9 +17,9 @@ from dataclasses import dataclass
 
 import requests
 
-from kronieker.cdx import count_captures, show_num_pages
-from kronieker.classifier import CDX_URLKEY_FILTER
-from kronieker.progress_ui import ProgressUI
+from kronikier.cdx import count_captures, show_num_pages
+from kronikier.classifier import CDX_URLKEY_FILTER
+from kronikier.progress_ui import ProgressUI
 
 #: Empirical CDX convention — each "index page" returned by ``showNumPages``
 #: corresponds to roughly this many records. Used as a *worst-case ceiling*

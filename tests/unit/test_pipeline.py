@@ -14,8 +14,8 @@ from pathlib import Path
 
 import responses
 
-from kronieker.cdx import CDX_ENDPOINT
-from kronieker.pipeline import scan_domain
+from kronikier.cdx import CDX_ENDPOINT
+from kronikier.pipeline import scan_domain
 
 FIXTURES = Path(__file__).parent.parent / "fixtures"
 
@@ -253,7 +253,7 @@ class TestProbeSmartSkip:
     """
 
     def _run(self, monkeypatch, responses_fn, paths=("/",), timestamps=None):
-        from kronieker.pipeline import _iter_well_known
+        from kronikier.pipeline import _iter_well_known
         import requests as _requests
 
         timestamps = timestamps or ("19990101", "20050101", "20100101", "20150101", "20200101")
@@ -263,7 +263,7 @@ class TestProbeSmartSkip:
             calls.append((url, timestamp))
             return responses_fn(url, timestamp)
 
-        monkeypatch.setattr("kronieker.pipeline.closest_snapshot", fake_closest)
+        monkeypatch.setattr("kronikier.pipeline.closest_snapshot", fake_closest)
         sess = _requests.Session()
         snaps = list(_iter_well_known(
             "ex.example", sess, probe_timestamps=timestamps, paths=paths,
@@ -284,7 +284,7 @@ class TestProbeSmartSkip:
         """Query 1999 → snap from 2020 ⇒ no captures in [1999, 2020] except
         S, so the remaining 2005/2010/2015/2020 queries can be skipped.
         """
-        from kronieker.cdx import Snapshot
+        from kronikier.cdx import Snapshot
 
         def fake(url, ts):
             return Snapshot(
@@ -307,7 +307,7 @@ class TestProbeSmartSkip:
         2005/2010/2015/2020 timestamps are all outside that interval — they
         must still trigger HTTP calls (we can't prove what's at those years).
         """
-        from kronieker.cdx import Snapshot
+        from kronikier.cdx import Snapshot
 
         # Return distinct snapshots for distinct queries to also exercise
         # the dedup path.
@@ -337,7 +337,7 @@ class TestProbeSmartSkip:
         of this test: make sure the same snapshot returned twice is just
         deduped, not crashed.
         """
-        from kronieker.cdx import Snapshot
+        from kronikier.cdx import Snapshot
 
         def fake(url, ts):
             if ts in ("19990101", "20050101"):
@@ -359,7 +359,7 @@ class TestStreamCdxWithBudget:
     """
 
     def _plan(self):
-        from kronieker.planner import ScanPlan
+        from kronikier.planner import ScanPlan
         return ScanPlan(
             deadline_monotonic=math.inf, timeout_seconds=0.0, avg_latency_s=0.5,
             effective_concurrency=4, capacity=100, cdx_num_pages=None,
@@ -374,7 +374,7 @@ class TestStreamCdxWithBudget:
         with whatever (possibly nothing) we got.
         """
         import requests as _requests
-        from kronieker.pipeline import _stream_cdx_with_budget
+        from kronikier.pipeline import _stream_cdx_with_budget
 
         def never_yields(*args, **kwargs):
             # Mimic IA's CDX server doing a long scan with no output.
@@ -382,7 +382,7 @@ class TestStreamCdxWithBudget:
             return
             yield  # pragma: no cover — generator marker
 
-        monkeypatch.setattr("kronieker.pipeline.query_domain", never_yields)
+        monkeypatch.setattr("kronikier.pipeline.query_domain", never_yields)
 
         start = time.monotonic()
         snaps, truncated, err = _stream_cdx_with_budget(
@@ -403,8 +403,8 @@ class TestStreamCdxWithBudget:
         assert elapsed < 2.0, f"main thread blocked for {elapsed:.2f}s — abandon failed"
 
     def test_returns_all_rows_when_iteration_finishes_within_budget(self, monkeypatch):
-        from kronieker.cdx import Snapshot
-        from kronieker.pipeline import _stream_cdx_with_budget
+        from kronikier.cdx import Snapshot
+        from kronikier.pipeline import _stream_cdx_with_budget
         import requests as _requests
 
         def fast_stream(*args, **kwargs):
@@ -415,7 +415,7 @@ class TestStreamCdxWithBudget:
                     mimetype="text/html", status="200", urlkey="",
                 )
 
-        monkeypatch.setattr("kronieker.pipeline.query_domain", fast_stream)
+        monkeypatch.setattr("kronikier.pipeline.query_domain", fast_stream)
 
         snaps, truncated, err = _stream_cdx_with_budget(
             "fast.example",
@@ -431,14 +431,14 @@ class TestStreamCdxWithBudget:
         assert err is None
 
     def test_propagates_request_exception_as_error_message(self, monkeypatch):
-        from kronieker.pipeline import _stream_cdx_with_budget
+        from kronikier.pipeline import _stream_cdx_with_budget
         import requests as _requests
 
         def crashing(*args, **kwargs):
             raise _requests.ConnectionError("simulated network drop")
             yield  # pragma: no cover
 
-        monkeypatch.setattr("kronieker.pipeline.query_domain", crashing)
+        monkeypatch.setattr("kronikier.pipeline.query_domain", crashing)
 
         snaps, truncated, err = _stream_cdx_with_budget(
             "ex.example",
@@ -555,8 +555,8 @@ def test_ctrl_c_mid_scan_preserves_partial_sightings_and_flags_interrupted(monke
     ``ScanResult.interrupted=True`` with every sighting collected before the
     keystroke still in ``sightings`` (so the CLI can save partial CSV).
     """
-    from kronieker.cdx import Snapshot
-    from kronieker.fetcher import FetchedPage
+    from kronikier.cdx import Snapshot
+    from kronikier.fetcher import FetchedPage
 
     domain = "interrupt-mid-scan.example"
     url = f"http://{domain}/contacts"
@@ -588,7 +588,7 @@ def test_ctrl_c_mid_scan_preserves_partial_sightings_and_flags_interrupted(monke
             return FetchedPage(snap, 200, f"<html>info@{domain}</html>")
         raise KeyboardInterrupt
 
-    monkeypatch.setattr("kronieker.fetcher._fetch_one", flaky_fetch)
+    monkeypatch.setattr("kronikier.fetcher._fetch_one", flaky_fetch)
 
     result = scan_domain(
         domain, timeout_seconds=120, probe_well_known=False,
@@ -688,7 +688,7 @@ def test_skips_probe_when_precise_count_positive_but_cdx_filter_empties_it():
 
 
 def test_regions_for_domain_prepends_cctld_region():
-    from kronieker.pipeline import _regions_for_domain
+    from kronikier.pipeline import _regions_for_domain
 
     # Need real-looking TLDs (the function keys off the last DNS label) but
     # the second-level label is a placeholder. None of these resolve.
@@ -706,7 +706,7 @@ def test_regions_for_domain_handles_popular_zones():
     """Spot-check the extended TLD map: a real-world domain in each zone
     should put the right country first.
     """
-    from kronieker.pipeline import _regions_for_domain
+    from kronikier.pipeline import _regions_for_domain
 
     defaults = ("RU", "BY", "UA", "KZ", "US", "GB", "DE", "FR")
     cases = {
@@ -837,7 +837,7 @@ def test_cdx_timeout_is_passed_through(monkeypatch):
         captured["timeout"] = kwargs.get("timeout")
         return iter([])  # empty result
 
-    import kronieker.pipeline as pipeline
+    import kronikier.pipeline as pipeline
     monkeypatch.setattr(pipeline, "query_domain", fake_query_domain)
     responses.add(
         responses.GET, "https://archive.org/wayback/available",
@@ -1119,8 +1119,8 @@ def test_probe_and_fetch_run_concurrently_in_default_mode(monkeypatch):
     """
     import threading
 
-    from kronieker.cdx import Snapshot
-    from kronieker.fetcher import FetchedPage
+    from kronikier.cdx import Snapshot
+    from kronikier.fetcher import FetchedPage
 
     domain = "interleave-demo.example"
 
@@ -1150,11 +1150,11 @@ def test_probe_and_fetch_run_concurrently_in_default_mode(monkeypatch):
         fetch_happened.set()
         return FetchedPage(snap, 200, f"<html>Email: info@{domain}</html>")
 
-    monkeypatch.setattr("kronieker.pipeline.closest_snapshot", fake_closest_snapshot)
-    monkeypatch.setattr("kronieker.fetcher._fetch_one", fake_fetch_one)
+    monkeypatch.setattr("kronikier.pipeline.closest_snapshot", fake_closest_snapshot)
+    monkeypatch.setattr("kronikier.fetcher._fetch_one", fake_fetch_one)
     # Pin planner preflight to "unknown size" so it doesn't short-circuit on
     # the (real) zero-capture response for ``interleave-demo.example``.
-    monkeypatch.setattr("kronieker.planner.show_num_pages", lambda *a, **k: None)
+    monkeypatch.setattr("kronikier.planner.show_num_pages", lambda *a, **k: None)
 
     result = scan_domain(
         domain,

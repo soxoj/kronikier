@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from kronieker.progress_ui import ProgressUI
+from kronikier.progress_ui import ProgressUI
 
 
 def _capture(ui: ProgressUI) -> list[str]:

@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from kronieker.report import (
+from kronikier.report import (
     _Row,
     _aggregate_rows,
     _default_csv_path,
@@ -17,8 +17,8 @@ from kronieker.report import (
     _sanitize_filename,
     _write_csv,
 )
-from kronieker.extractors import Contact
-from kronieker.pipeline import ContactSighting, ScanResult
+from kronikier.extractors import Contact
+from kronikier.pipeline import ContactSighting, ScanResult
 
 
 # ---------------------------------------------------------------------------
@@ -250,8 +250,8 @@ def test_aggregate_rows_collects_distinct_raw_forms():
 
 def test_text_report_hint_suggests_timeout_increase_when_exhausted(capsys):
     """When the scan stopped at the timeout, suggest --timeout N×2 or --all."""
-    from kronieker.report import _render_text_report
-    from kronieker.pipeline import ScanResult
+    from kronikier.report import _render_text_report
+    from kronikier.pipeline import ScanResult
 
     result = ScanResult(
         domain="example.com",
@@ -274,8 +274,8 @@ def test_text_report_hint_suggests_timeout_increase_when_exhausted(capsys):
 
 def test_text_report_hint_suggests_all_when_filter_was_active(capsys):
     """When the scan finished inside the timeout but the filter was on, suggest --all."""
-    from kronieker.report import _render_text_report
-    from kronieker.pipeline import ScanResult
+    from kronikier.report import _render_text_report
+    from kronikier.pipeline import ScanResult
 
     result = ScanResult(
         domain="example.com",
@@ -295,8 +295,8 @@ def test_text_report_hint_suggests_all_when_filter_was_active(capsys):
 
 def test_text_report_no_hint_when_filter_off_and_within_timeout(capsys):
     """Already broadest scan — no hint needed."""
-    from kronieker.report import _render_text_report
-    from kronieker.pipeline import ScanResult
+    from kronikier.report import _render_text_report
+    from kronikier.pipeline import ScanResult
 
     result = ScanResult(
         domain="example.com",
@@ -323,7 +323,7 @@ class TestTextReportInSingleUrlMode:
     """
 
     def _result(self, **overrides):
-        from kronieker.pipeline import ScanResult
+        from kronikier.pipeline import ScanResult
         kw = dict(
             domain="www.example.com",
             snapshots_considered=3, snapshots_fetched=3,
@@ -339,7 +339,7 @@ class TestTextReportInSingleUrlMode:
         return ScanResult(**kw)
 
     def test_header_names_url_not_domain(self, capsys):
-        from kronieker.report import _render_text_report
+        from kronikier.report import _render_text_report
 
         _render_text_report(self._result(), rows=[], csv_path=None)
         out = capsys.readouterr().out
@@ -351,7 +351,7 @@ class TestTextReportInSingleUrlMode:
         active in the first place. The host-wide "try --all" hint must not
         appear under single-URL.
         """
-        from kronieker.report import _render_text_report
+        from kronikier.report import _render_text_report
 
         _render_text_report(self._result(), rows=[], csv_path=None)
         err = capsys.readouterr().err
@@ -359,7 +359,7 @@ class TestTextReportInSingleUrlMode:
         assert "Contact-URL filter" not in err
 
     def test_timeout_exhausted_hint_only_suggests_extending_timeout(self, capsys):
-        from kronieker.report import _render_text_report
+        from kronikier.report import _render_text_report
 
         _render_text_report(
             self._result(timeout_exhausted=True, elapsed_seconds=90.0),
@@ -372,7 +372,7 @@ class TestTextReportInSingleUrlMode:
 
     def test_json_includes_single_url_field(self, capsys):
         import json as _json
-        from kronieker.report import _render_json_report
+        from kronikier.report import _render_json_report
 
         _render_json_report(self._result(), rows=[], csv_path=None)
         payload = _json.loads(capsys.readouterr().out)
@@ -381,8 +381,8 @@ class TestTextReportInSingleUrlMode:
 
 
 def test_text_report_prints_no_contacts_message_when_empty(capsys):
-    from kronieker.report import _render_text_report
-    from kronieker.pipeline import ScanResult
+    from kronikier.report import _render_text_report
+    from kronikier.pipeline import ScanResult
 
     result = ScanResult(
         domain="empty.example",
@@ -399,9 +399,9 @@ def test_text_report_prints_no_contacts_message_when_empty(capsys):
 
 def test_cli_does_not_write_csv_when_no_results(tmp_path, monkeypatch):
     """Empty CSV files are noise — don't write them."""
-    from kronieker import cli
-    from kronieker.calibration import Calibration, CALIBRATION_VERSION
-    from kronieker.pipeline import ScanResult
+    from kronikier import cli
+    from kronikier.calibration import Calibration, CALIBRATION_VERSION
+    from kronikier.pipeline import ScanResult
 
     empty_result = ScanResult(
         domain="empty.example",
@@ -432,7 +432,7 @@ def test_cli_does_not_write_csv_when_no_results(tmp_path, monkeypatch):
 
 
 def test_named_aliases_map_to_timeout():
-    from kronieker.cli import build_parser, resolve_timeout
+    from kronikier.cli import build_parser, resolve_timeout
 
     p = build_parser()
     assert resolve_timeout(p.parse_args(["example.com"])) == (300.0, False)
@@ -443,7 +443,7 @@ def test_named_aliases_map_to_timeout():
 
 
 def test_explicit_timeout_overrides_alias_default():
-    from kronieker.cli import build_parser, resolve_timeout
+    from kronikier.cli import build_parser, resolve_timeout
 
     p = build_parser()
     assert resolve_timeout(p.parse_args(["example.com", "--timeout", "45"])) == (45.0, False)
@@ -452,7 +452,7 @@ def test_explicit_timeout_overrides_alias_default():
 
 def test_all_flag_is_sticky_on_top_of_aliases():
     """--all combined with --deep stays --all."""
-    from kronieker.cli import build_parser, resolve_timeout
+    from kronikier.cli import build_parser, resolve_timeout
 
     p = build_parser()
     assert resolve_timeout(p.parse_args(["example.com", "--deep", "--all"])) == (900.0, True)
@@ -461,7 +461,7 @@ def test_all_flag_is_sticky_on_top_of_aliases():
 
 def test_timeout_and_named_mode_mutex_errors():
     """Passing --timeout and --deep simultaneously is rejected by argparse."""
-    from kronieker.cli import build_parser
+    from kronikier.cli import build_parser
 
     p = build_parser()
     with pytest.raises(SystemExit):
@@ -475,8 +475,8 @@ def test_ctrl_c_returns_130_and_no_traceback(monkeypatch, capsys):
     trace through threads' finally-blocks. main() must swallow it and
     return the standard SIGINT exit code.
     """
-    from kronieker import cli
-    from kronieker.calibration import Calibration, CALIBRATION_VERSION
+    from kronikier import cli
+    from kronikier.calibration import Calibration, CALIBRATION_VERSION
 
     def raise_kbd(*a, **kw):
         raise KeyboardInterrupt
@@ -506,10 +506,10 @@ def test_ctrl_c_mid_scan_saves_partial_csv(monkeypatch, tmp_path, capsys):
     state survives). Even one phone or email gathered before the keystroke
     should land in CSV and the rendered report.
     """
-    from kronieker import cli
-    from kronieker.calibration import Calibration, CALIBRATION_VERSION
-    from kronieker.extractors import Contact
-    from kronieker.pipeline import ContactSighting, ScanResult
+    from kronikier import cli
+    from kronikier.calibration import Calibration, CALIBRATION_VERSION
+    from kronikier.extractors import Contact
+    from kronikier.pipeline import ContactSighting, ScanResult
 
     partial = ScanResult(
         domain="example.com",
@@ -560,13 +560,13 @@ def test_ctrl_c_mid_batch_stops_iteration_after_current_target(monkeypatch, tmp_
     """In batch mode, Ctrl+C during target N must save target N's partial
     results and skip target N+1 entirely, not roll into the next scan.
     """
-    from kronieker import cli
-    from kronieker.calibration import Calibration, CALIBRATION_VERSION
+    from kronikier import cli
+    from kronikier.calibration import Calibration, CALIBRATION_VERSION
 
     scans_run: list[str] = []
 
     def fake_scan(domain, **kw):
-        from kronieker.pipeline import ScanResult
+        from kronikier.pipeline import ScanResult
         scans_run.append(domain)
         return ScanResult(
             domain=domain,
@@ -607,7 +607,7 @@ class TestSingleUrlMode:
     """
 
     def _calibration(self):
-        from kronieker.calibration import Calibration, CALIBRATION_VERSION
+        from kronikier.calibration import Calibration, CALIBRATION_VERSION
         return Calibration(
             version=CALIBRATION_VERSION, avg_latency_s=0.42, sample_count=8,
             last_calibrated_at="2026-01-01T00:00:00+00:00",
@@ -619,7 +619,7 @@ class TestSingleUrlMode:
             captured["domain"] = domain
             captured["single_url"] = kw.get("single_url")
             captured["probe_well_known"] = kw.get("probe_well_known")
-            from kronieker.pipeline import ScanResult
+            from kronikier.pipeline import ScanResult
             return ScanResult(
                 domain=domain, snapshots_considered=0, snapshots_fetched=0,
                 sightings=[], errors=[],
@@ -627,7 +627,7 @@ class TestSingleUrlMode:
         return fake_scan
 
     def test_passes_url_through_to_scan_domain(self, monkeypatch):
-        from kronieker import cli
+        from kronikier import cli
 
         captured = {}
         monkeypatch.setattr(cli, "scan_domain", self._stub_scan(captured))
@@ -643,7 +643,7 @@ class TestSingleUrlMode:
         assert captured["single_url"] == "https://www.example.com/azovdisk/about"
 
     def test_mutex_with_positional_domain(self, monkeypatch, capsys):
-        from kronieker import cli
+        from kronikier import cli
 
         monkeypatch.setattr(cli, "ensure_calibration", lambda **kw: self._calibration())
 
@@ -655,7 +655,7 @@ class TestSingleUrlMode:
         assert "pick exactly one input" in capsys.readouterr().err
 
     def test_mutex_with_targets_file(self, monkeypatch, capsys, tmp_path):
-        from kronieker import cli
+        from kronikier import cli
 
         monkeypatch.setattr(cli, "ensure_calibration", lambda **kw: self._calibration())
         tf = tmp_path / "t.txt"
@@ -669,7 +669,7 @@ class TestSingleUrlMode:
         assert "pick exactly one input" in capsys.readouterr().err
 
     def test_rejects_url_without_scheme(self, monkeypatch, capsys):
-        from kronieker import cli
+        from kronikier import cli
 
         monkeypatch.setattr(cli, "ensure_calibration", lambda **kw: self._calibration())
 
@@ -683,7 +683,7 @@ class TestSingleUrlMode:
 
     def test_disables_probe_implicitly(self, monkeypatch):
         """Single-URL mode must override probe_well_known regardless of CLI."""
-        from kronieker import cli
+        from kronikier import cli
 
         captured = {}
         monkeypatch.setattr(cli, "scan_domain", self._stub_scan(captured))
@@ -709,7 +709,7 @@ class TestVerboseDebugSplit:
     """
 
     def _calibration(self):
-        from kronieker.calibration import Calibration, CALIBRATION_VERSION
+        from kronikier.calibration import Calibration, CALIBRATION_VERSION
         return Calibration(
             version=CALIBRATION_VERSION, avg_latency_s=0.42, sample_count=8,
             last_calibrated_at="2026-01-01T00:00:00+00:00",
@@ -719,7 +719,7 @@ class TestVerboseDebugSplit:
     def _stub_scan(self, captured):
         def fake_scan(domain, **kw):
             captured["verbose"] = kw.get("verbose")
-            from kronieker.pipeline import ScanResult
+            from kronikier.pipeline import ScanResult
             return ScanResult(
                 domain=domain, snapshots_considered=0, snapshots_fetched=0,
                 sightings=[], errors=[],
@@ -728,7 +728,7 @@ class TestVerboseDebugSplit:
 
     def test_v_does_not_enable_debug_logging(self, monkeypatch):
         """`-v` must NOT turn root logger to DEBUG. Only `-d` does."""
-        from kronieker import cli
+        from kronikier import cli
         import logging
 
         captured = {}
@@ -747,7 +747,7 @@ class TestVerboseDebugSplit:
 
     def test_d_enables_debug_without_verbose_feed(self, monkeypatch):
         """`-d` must turn on DEBUG logs, and must NOT turn on the verbose feed."""
-        from kronieker import cli
+        from kronikier import cli
         import logging
 
         captured = {}
@@ -762,7 +762,7 @@ class TestVerboseDebugSplit:
 
     def test_both_v_and_d_combine(self, monkeypatch):
         """Passing both flags together is allowed and applies both effects."""
-        from kronieker import cli
+        from kronikier import cli
         import logging
 
         captured = {}
@@ -777,9 +777,9 @@ class TestVerboseDebugSplit:
 
 
 def test_calibrate_flag_does_not_scan(monkeypatch, tmp_path, capsys):
-    """`kronieker --calibrate` refreshes the cache and exits without scanning."""
-    from kronieker import cli
-    from kronieker.calibration import Calibration, CALIBRATION_VERSION
+    """`kronikier --calibrate` refreshes the cache and exits without scanning."""
+    from kronikier import cli
+    from kronikier.calibration import Calibration, CALIBRATION_VERSION
 
     scan_called = {"n": 0}
 
@@ -810,53 +810,53 @@ def test_calibrate_flag_does_not_scan(monkeypatch, tmp_path, capsys):
 
 class TestParseTargetLine:
     def test_bare_domain(self):
-        from kronieker.cli import _parse_target_line
+        from kronikier.cli import _parse_target_line
         assert _parse_target_line("example.com") == ("example.com", None)
 
     def test_bare_domain_with_trailing_slash(self):
-        from kronieker.cli import _parse_target_line
+        from kronikier.cli import _parse_target_line
         assert _parse_target_line("example.com/") == ("example.com", None)
 
     def test_domain_with_path_no_scheme(self):
-        from kronieker.cli import _parse_target_line
+        from kronikier.cli import _parse_target_line
         assert _parse_target_line("example.com/contact") == ("example.com", "/contact")
 
     def test_full_url_https(self):
-        from kronieker.cli import _parse_target_line
+        from kronikier.cli import _parse_target_line
         assert _parse_target_line("https://example.com/o-nas/team") == (
             "example.com", "/o-nas/team",
         )
 
     def test_full_url_http(self):
-        from kronieker.cli import _parse_target_line
+        from kronikier.cli import _parse_target_line
         assert _parse_target_line("http://example.com/contact") == (
             "example.com", "/contact",
         )
 
     def test_subdomain_preserved(self):
-        from kronieker.cli import _parse_target_line
+        from kronikier.cli import _parse_target_line
         assert _parse_target_line("https://news.corp.example/2018/x") == (
             "news.corp.example", "/2018/x",
         )
 
     def test_port_stripped(self):
-        from kronieker.cli import _parse_target_line
+        from kronikier.cli import _parse_target_line
         assert _parse_target_line("example.com:8080/page") == (
             "example.com", "/page",
         )
 
     def test_trailing_slash_in_path_dropped(self):
-        from kronieker.cli import _parse_target_line
+        from kronikier.cli import _parse_target_line
         assert _parse_target_line("https://x.ru/contacts/") == ("x.ru", "/contacts")
 
     def test_uppercase_host_lowered(self):
-        from kronieker.cli import _parse_target_line
+        from kronikier.cli import _parse_target_line
         assert _parse_target_line("HTTPS://Example.COM/Path") == (
             "example.com", "/Path",
         )
 
     def test_empty_raises(self):
-        from kronieker.cli import _parse_target_line
+        from kronikier.cli import _parse_target_line
         with pytest.raises(ValueError):
             _parse_target_line("https:///path")
 
@@ -864,7 +864,7 @@ class TestParseTargetLine:
 def test_parse_targets_file_merges_same_domain(tmp_path):
     """Multiple URLs for one host collapse into one Target with extras
     in first-seen order; bare-domain entries don't lose their slot."""
-    from kronieker.cli import parse_targets_file
+    from kronikier.cli import parse_targets_file
 
     f = tmp_path / "targets.txt"
     f.write_text(
@@ -894,7 +894,7 @@ def test_parse_targets_file_merges_same_domain(tmp_path):
 
 
 def test_parse_targets_file_reports_lineno_on_bad_entry(tmp_path):
-    from kronieker.cli import parse_targets_file
+    from kronikier.cli import parse_targets_file
 
     f = tmp_path / "bad.txt"
     f.write_text("example.com\n\nhttps:///nohost\n", encoding="utf-8")
@@ -906,9 +906,9 @@ def test_parse_targets_file_reports_lineno_on_bad_entry(tmp_path):
 def test_targets_file_dispatches_to_scan_domain(monkeypatch, tmp_path, capsys):
     """`--targets-file` runs scan_domain once per merged target and forwards
     extra_paths through to scan_domain's kwargs."""
-    from kronieker import cli
-    from kronieker.calibration import Calibration, CALIBRATION_VERSION
-    from kronieker.pipeline import ScanResult
+    from kronikier import cli
+    from kronikier.calibration import Calibration, CALIBRATION_VERSION
+    from kronikier.pipeline import ScanResult
 
     targets_file = tmp_path / "targets.txt"
     targets_file.write_text(
@@ -948,7 +948,7 @@ def test_targets_file_dispatches_to_scan_domain(monkeypatch, tmp_path, capsys):
 
 
 def test_positional_and_targets_file_mutex(tmp_path, capsys):
-    from kronieker import cli
+    from kronikier import cli
 
     f = tmp_path / "t.txt"
     f.write_text("example.com\n", encoding="utf-8")
@@ -961,7 +961,7 @@ def test_positional_and_targets_file_mutex(tmp_path, capsys):
 
 
 def test_targets_file_empty_errors(tmp_path, capsys):
-    from kronieker import cli
+    from kronikier import cli
 
     f = tmp_path / "empty.txt"
     f.write_text("# only comments\n\n", encoding="utf-8")

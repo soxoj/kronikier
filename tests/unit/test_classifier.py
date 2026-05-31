@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from kronieker.classifier import (
+from kronikier.classifier import (
     WELL_KNOWN_PATHS,
     is_probably_contact_page,
     score_url,
@@ -91,11 +91,11 @@ def test_well_known_paths_loaded_from_data_file():
 def _stage_fixture(tmp_path, monkeypatch, filename: str, body: str) -> None:
     """Stage ``data/<filename>`` under ``tmp_path`` and point the loader at it.
 
-    The real loader joins ``files('kronieker') / 'data' / FNAME``,
+    The real loader joins ``files('kronikier') / 'data' / FNAME``,
     so we monkeypatch ``files`` to return ``tmp_path`` — pathlib's
     ``__truediv__`` then chains naturally.
     """
-    from kronieker import classifier as cls
+    from kronikier import classifier as cls
 
     data_dir = tmp_path / "data"
     data_dir.mkdir()
@@ -107,7 +107,7 @@ def _stage_fixture(tmp_path, monkeypatch, filename: str, body: str) -> None:
 
 def test_well_known_paths_loader_rejects_bare_word(tmp_path, monkeypatch):
     """A malformed file (path without leading ``/``) raises with line number."""
-    from kronieker import classifier as cls
+    from kronikier import classifier as cls
 
     _stage_fixture(tmp_path, monkeypatch, "bad.txt", "/contact\nabout\n/team\n")
 
@@ -116,7 +116,7 @@ def test_well_known_paths_loader_rejects_bare_word(tmp_path, monkeypatch):
 
 
 def test_well_known_paths_loader_ignores_comments_and_blanks(tmp_path, monkeypatch):
-    from kronieker import classifier as cls
+    from kronikier import classifier as cls
 
     _stage_fixture(
         tmp_path, monkeypatch, "paths.txt",

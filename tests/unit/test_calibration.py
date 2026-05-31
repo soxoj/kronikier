@@ -7,8 +7,8 @@ import os
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from kronieker import calibration as cal_mod
-from kronieker.calibration import (
+from kronikier import calibration as cal_mod
+from kronikier.calibration import (
     CALIBRATION_VERSION,
     DEFAULT_AVG_LATENCY_S,
     MIN_SUCCESSFUL_SAMPLES,
@@ -20,8 +20,8 @@ from kronieker.calibration import (
     run_calibration,
     save,
 )
-from kronieker.cdx import Snapshot
-from kronieker.fetcher import FetchedPage
+from kronikier.cdx import Snapshot
+from kronikier.fetcher import FetchedPage
 
 
 def _make_cal(**overrides) -> Calibration:

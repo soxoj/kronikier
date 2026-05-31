@@ -1,6 +1,6 @@
 # Usage
 
-`kronieker` recovers emails and phone numbers from the
+`kronikier` recovers emails and phone numbers from the
 web.archive.org history of a domain. The tool is driven by a **time
 timeout** — you tell it how long you're willing to wait, and it picks
 how many snapshots to scan so the run fits.
@@ -26,36 +26,36 @@ Python 3.10+.
 
 ```bash
 # Default 5-minute timeout — fast, contact-URL filter on.
-kronieker theranos.com
+kronikier theranos.com
 
 # Longer timeout on a harder case:
-kronieker mysite.ru --timeout 900
+kronikier mysite.ru --timeout 900
 
 # Scan every URL (not just contact pages), still inside the default timeout:
-kronieker wirecard.com --all
+kronikier wirecard.com --all
 
 # Unlimited time, every URL — for small defunct sites where you want everything:
-kronieker old-defunct-corp.com --exhaustive
+kronikier old-defunct-corp.com --exhaustive
 
 # Pipe machine-readable output to another tool:
-kronieker mysite.ru --json > mysite.json
+kronikier mysite.ru --json > mysite.json
 
 # Batch: scan a list of domains/URLs from a file (one per line):
-kronieker --targets-file targets.txt
+kronikier --targets-file targets.txt
 
 # Single-URL mode: examine one specific page's history across snapshots.
-kronieker --single-url https://www.theranos.com/contact-us
+kronikier --single-url https://www.theranos.com/contact-us
 ```
 
 The first ever invocation runs a one-time **calibration** (~3-5 sec) to
 measure your machine's archive-fetch latency, cached at
-`~/.cache/kronieker/calibration.json` and reused for 14 days.
+`~/.cache/kronikier/calibration.json` and reused for 14 days.
 
 ---
 
 ## How the timeout works
 
-When you run `kronieker example.com --timeout 300`, the tool:
+When you run `kronikier example.com --timeout 300`, the tool:
 
 1. Pulls a cheap **size signal** from CDX (`showNumPages`, ~1 sec).
 2. Reads the cached **calibration** (e.g. `0.42 s/snapshot`).
@@ -101,10 +101,10 @@ The tool runs a one-time latency calibration on its first ever invocation
 
 ```bash
 # Refresh the calibration without running a scan:
-kronieker --calibrate
+kronikier --calibrate
 
 # Run a scan *and* refresh the calibration first:
-kronieker example.com --recalibrate
+kronikier example.com --recalibrate
 ```
 
 A stale or wrong calibration just makes the timeout→capacity estimate
@@ -117,11 +117,11 @@ recalibrate if they drift significantly.
 ## CLI reference
 
 ```
-kronieker <domain> [options]
-kronieker --targets-file PATH [options]     # batch
-kronieker --single-url URL [options]        # one specific page across time
-kronieker --calibrate                       # one-off, no scan
-kronieker --clear-cache                     # wipe the snapshot cache
+kronikier <domain> [options]
+kronikier --targets-file PATH [options]     # batch
+kronikier --single-url URL [options]        # one specific page across time
+kronikier --calibrate                       # one-off, no scan
+kronikier --clear-cache                     # wipe the snapshot cache
 ```
 
 ### Timeout and mode (mutually exclusive)
@@ -159,7 +159,7 @@ kronieker --clear-cache                     # wipe the snapshot cache
 | `--from-year YYYY`    | Limit CDX query to >= year.                                                                     |
 | `--to-year YYYY`      | Limit CDX query to <= year.                                                                     |
 | `--no-subdomains`     | Restrict to exact host instead of `domain` + subdomains.                                        |
-| `--no-probe`          | Skip the well-known-paths availability probe. The path list itself lives in `kronieker/data/well_known_paths.txt` — one path per line, `#` for comments — edit it to add domain-specific guesses without touching the code.|
+| `--no-probe`          | Skip the well-known-paths availability probe. The path list itself lives in `kronikier/data/well_known_paths.txt` — one path per line, `#` for comments — edit it to add domain-specific guesses without touching the code.|
 | `--min-score N`       | Drop URLs whose path-classifier score is below N.                                               |
 
 ### Performance and resilience
@@ -190,8 +190,8 @@ kronieker --clear-cache                     # wipe the snapshot cache
 | `--no-cache`    | Don't read from or write to the local snapshot cache during this run — every fetch goes to wayback.               |
 | `--clear-cache` | Delete every cached snapshot file and exit. Use to free disk space; doesn't run a scan.                           |
 
-The cache root is `$XDG_CACHE_HOME/kronieker/snapshots/` (default
-`~/.cache/kronieker/snapshots/`), overridable with the `KRONIEKER_CACHE_DIR`
+The cache root is `$XDG_CACHE_HOME/kronikier/snapshots/` (default
+`~/.cache/kronikier/snapshots/`), overridable with the `KRONIEKER_CACHE_DIR`
 env var. See the dedicated section below for how cache files are laid out.
 
 ---
@@ -290,7 +290,7 @@ HTML, **enabled by default**.
 Layout: one HTML file per `(timestamp, url)` pair, grouped by host:
 
 ```
-~/.cache/kronieker/snapshots/
+~/.cache/kronikier/snapshots/
 ├── theranos.com/
 │   ├── 20140902120000__contact-us__a3f9d4e1.html
 │   └── 20120101000000__index.html__b2c01f9a.html
@@ -332,10 +332,10 @@ page.
 
 ```bash
 # Every archived version of theranos.com's leadership page:
-kronieker --single-url https://www.theranos.com/leadership
+kronikier --single-url https://www.theranos.com/leadership
 
 # How did one specific subdomain page change over time?
-kronieker --single-url https://news.theranos.com/2018/05/...
+kronikier --single-url https://news.theranos.com/2018/05/...
 ```
 
 When to reach for it:
@@ -357,7 +357,7 @@ and `--targets-file`.
 ### Defunct site, all contacts ever
 
 ```bash
-kronieker theranos.com --exhaustive --max-snapshots 500
+kronikier theranos.com --exhaustive --max-snapshots 500
 ```
 
 Use `--exhaustive` (= `--timeout 0 --all`) when you want every snapshot
@@ -368,7 +368,7 @@ the site is unexpectedly huge.
 ### Live site, missing contact info
 
 ```bash
-kronieker mysite.ru
+kronikier mysite.ru
 ```
 
 Default timeout (300 s) with the contact-URL filter on. If the first
@@ -379,7 +379,7 @@ that's still not enough.
 ### Bulk OSINT pipeline
 
 ```bash
-kronieker --targets-file targets.txt --no-progress
+kronikier --targets-file targets.txt --no-progress
 ```
 
 `targets.txt` is plain text, one entry per line — bare domains or full
@@ -414,7 +414,7 @@ in a directory:
 
 ```bash
 for d in $(cat domains.txt); do
-  kronieker "$d" --json --no-progress > "results/$d.json"
+  kronikier "$d" --json --no-progress > "results/$d.json"
 done
 ```
 
@@ -424,7 +424,7 @@ files still land in the working directory.
 ### Restricting to a specific era
 
 ```bash
-kronieker old-corp.com --timeout 900 --from-year 2008 --to-year 2012
+kronikier old-corp.com --timeout 900 --from-year 2008 --to-year 2012
 ```
 
 Useful when a known event (a sale, a rebrand, a scandal) gives you a
@@ -441,7 +441,7 @@ Some giant sites (marketplace-scale, 5 000+ CDX pages) need longer than the
 default 300 s timeout. Bump it:
 
 ```bash
-kronieker huge-marketplace.example --cdx-timeout 900
+kronikier huge-marketplace.example --cdx-timeout 900
 ```
 
 The error message also prints this hint.
@@ -456,7 +456,7 @@ Three things to check, in order:
    filters CDX by a regex of contact-y slugs (`/contact`, `/about`,
    etc.). Custom paths like `/get-in-touch` slip through the filter —
    add `--all` to scan every URL.
-3. **Is the calibration stale?** Run `kronieker --calibrate` to
+3. **Is the calibration stale?** Run `kronikier --calibrate` to
    refresh. A wrong calibration leads to a wrong capacity estimate
    (slower or faster than your machine really is).
 
@@ -482,7 +482,7 @@ If your target's site is on a TLD that doesn't match its real country
 (e.g. a Russian SMB hosted on `.com`), override the order:
 
 ```bash
-kronieker russian-smb.example.com --regions RU,US,GB
+kronikier russian-smb.example.com --regions RU,US,GB
 ```
 
 The CSV `value_raw` column always holds the as-seen original — pivot off
@@ -491,7 +491,7 @@ that when the canonical `value` is suspicious.
 ### "DEBUG details about what the fetcher / probe is doing"
 
 ```bash
-kronieker example.com -d --no-progress
+kronikier example.com -d --no-progress
 ```
 
 `-d` (or `--debug`) raises the log level to DEBUG. Useful when a fetch is
@@ -510,11 +510,11 @@ small-business sites use them everywhere. Cross-reference the
 
 ## Programmatic use
 
-The CLI is a thin wrapper around `kronieker.scan_domain`. Library
+The CLI is a thin wrapper around `kronikier.scan_domain`. Library
 callers don't have to go through the CLI:
 
 ```python
-from kronieker import scan_domain
+from kronikier import scan_domain
 
 result = scan_domain(
     "theranos.com",
@@ -539,7 +539,7 @@ feature). If you want an accurate capacity estimate, pass your own
 `Calibration`:
 
 ```python
-from kronieker.calibration import ensure_calibration
+from kronikier.calibration import ensure_calibration
 cal = ensure_calibration(announce=False)
 result = scan_domain("theranos.com", timeout_seconds=300, calibration=cal)
 ```
@@ -569,7 +569,7 @@ The on-disk snapshot cache is *not* attached automatically when
 want it:
 
 ```python
-from kronieker.cache import SnapshotCache, default_cache_dir
+from kronikier.cache import SnapshotCache, default_cache_dir
 cache = SnapshotCache(default_cache_dir())
 result = scan_domain("theranos.com", cache=cache)
 ```

@@ -45,7 +45,7 @@ DEFAULT_TIMEOUT = 30
 CDX_QUERY_TIMEOUT = 300
 
 DEFAULT_USER_AGENT = (
-    "kronieker/0.1 (+https://github.com/soxoj/kronieker)"
+    "kronikier/0.1 (+https://github.com/soxoj/kronikier)"
 )
 
 

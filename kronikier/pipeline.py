@@ -1,6 +1,6 @@
 """End-to-end pipeline: domain → ranked snapshots → fetched pages → contacts.
 
-The pipeline is driven by a :class:`~kronieker.planner.ScanPlan` which
+The pipeline is driven by a :class:`~kronikier.planner.ScanPlan` which
 encodes the user's wall-clock timeout, the calibrated per-snapshot latency,
 and the resulting "how many snapshots can we fetch / should we filter by URL"
 decisions. Mode-name flags (``--default/--deep/--exhaustive/--auto``) are
@@ -21,20 +21,20 @@ from typing import TYPE_CHECKING, Iterable
 import requests
 
 if TYPE_CHECKING:
-    from kronieker.cache import SnapshotCache
+    from kronikier.cache import SnapshotCache
 
-from kronieker.calibration import Calibration, DEFAULT_AVG_LATENCY_S
-from kronieker.cdx import (
+from kronikier.calibration import Calibration, DEFAULT_AVG_LATENCY_S
+from kronikier.cdx import (
     DEFAULT_USER_AGENT,
     Snapshot,
     closest_snapshot,
     query_domain,
 )
-from kronieker.classifier import WELL_KNOWN_PATHS, score_url
-from kronieker.extractors import Contact, extract_contacts
-from kronieker.fetcher import FetchedPage, fetch_snapshots
-from kronieker.planner import ScanPlan, broaden_plan, extend_plan, make_plan
-from kronieker.progress_ui import ProgressUI
+from kronikier.classifier import WELL_KNOWN_PATHS, score_url
+from kronikier.extractors import Contact, extract_contacts
+from kronikier.fetcher import FetchedPage, fetch_snapshots
+from kronikier.planner import ScanPlan, broaden_plan, extend_plan, make_plan
+from kronikier.progress_ui import ProgressUI
 
 log = logging.getLogger(__name__)
 
