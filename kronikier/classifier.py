@@ -114,7 +114,7 @@ _WELL_KNOWN_PATHS_RESOURCE = "well_known_paths.txt"
 
 
 def _load_well_known_paths() -> tuple[str, ...]:
-    raw = (files("kronieker") / "data" / _WELL_KNOWN_PATHS_RESOURCE).read_text(
+    raw = (files("kronikier") / "data" / _WELL_KNOWN_PATHS_RESOURCE).read_text(
         encoding="utf-8"
     )
     seen: set[str] = set()

@@ -6,7 +6,7 @@ import json
 
 import responses
 
-from kronieker.cdx import (
+from kronikier.cdx import (
     CDX_ENDPOINT,
     Snapshot,
     closest_snapshot,

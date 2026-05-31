@@ -18,7 +18,7 @@ from typing import Sequence
 
 import phonenumbers
 
-from kronieker.pipeline import ScanResult
+from kronikier.pipeline import ScanResult
 
 
 # ---------------------------------------------------------------------------

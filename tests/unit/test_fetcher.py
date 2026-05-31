@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import responses
 
-from kronieker.cdx import Snapshot
-from kronieker.fetcher import fetch_snapshots
+from kronikier.cdx import Snapshot
+from kronikier.fetcher import fetch_snapshots
 
 
 def _snap(ts: str, url: str) -> Snapshot:
@@ -71,7 +71,7 @@ def test_fetch_retries_transient_404_then_succeeds():
     # Need retries >= 1 to recover. Use a 0 rate limit so we don't actually
     # wait the 3-sec backoff; instead the test mocks make the second call
     # return immediately.
-    import kronieker.fetcher as _fetcher
+    import kronikier.fetcher as _fetcher
     orig_sleep = _fetcher.time.sleep
     _fetcher.time.sleep = lambda _s: None
     try:

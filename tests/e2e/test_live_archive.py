@@ -28,8 +28,8 @@ import socket
 import pytest
 import requests
 
-from kronieker.cdx import query_domain
-from kronieker.pipeline import scan_domain
+from kronikier.cdx import query_domain
+from kronikier.pipeline import scan_domain
 
 
 def _network_available() -> bool:
@@ -124,7 +124,7 @@ def test_current_theranos_has_no_contacts_but_archive_does():
     (parked / gone). The wayback scan returns archived contacts. This is
     the asymmetry that justifies the tool's existence.
     """
-    from kronieker.extractors import extract_contacts
+    from kronikier.extractors import extract_contacts
 
     live_emails: set[str] = set()
     try:

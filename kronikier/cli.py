@@ -1,4 +1,4 @@
-"""Command-line entry point: ``kronieker example.com``."""
+"""Command-line entry point: ``kronikier example.com``."""
 
 from __future__ import annotations
 
@@ -10,13 +10,13 @@ from pathlib import Path
 
 import requests
 
-from kronieker.calibration import (
+from kronikier.calibration import (
     Calibration,
     ensure_calibration,
 )
-from kronieker.cdx import DEFAULT_USER_AGENT
-from kronieker.pipeline import scan_domain
-from kronieker.report import (
+from kronikier.cdx import DEFAULT_USER_AGENT
+from kronikier.pipeline import scan_domain
+from kronikier.report import (
     _aggregate_rows,
     _default_csv_path,
     _render_json_report,
@@ -125,7 +125,7 @@ MODE_ALIASES: dict[str, tuple[float, bool]] = {
 
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
-        prog="kronieker",
+        prog="kronikier",
         description=(
             "Mine emails and phone numbers from a domain's web.archive.org "
             "history. Scans are driven by a wall-clock timeout — pass "
@@ -258,7 +258,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--no-cache", action="store_true",
                    help="Disable the on-disk snapshot cache for this run "
                    "(every fetch goes to web.archive.org). Default: cache is "
-                   "ON at ~/.cache/kronieker/snapshots/.")
+                   "ON at ~/.cache/kronikier/snapshots/.")
     p.add_argument("--clear-cache", action="store_true",
                    help="Delete every cached snapshot and exit. Use to free disk "
                    "space; does not run a scan.")
@@ -330,7 +330,7 @@ def _main_impl(argv: list[str] | None = None) -> int:
         return _run_calibrate_only()
 
     if args.clear_cache:
-        from kronieker.cache import SnapshotCache, default_cache_dir
+        from kronikier.cache import SnapshotCache, default_cache_dir
         cache_dir = default_cache_dir()
         cache = SnapshotCache(cache_dir)
         removed = cache.clear()
@@ -410,7 +410,7 @@ def _main_impl(argv: list[str] | None = None) -> int:
 
     cache = None
     if not args.no_cache:
-        from kronieker.cache import SnapshotCache, default_cache_dir
+        from kronikier.cache import SnapshotCache, default_cache_dir
         cache_dir = default_cache_dir()
         try:
             cache = SnapshotCache(cache_dir)

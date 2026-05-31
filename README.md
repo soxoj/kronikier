@@ -1,4 +1,4 @@
-# kronieker
+# kronikier
 
 OSINT tool that mines **historical** contacts (email, phone numbers) for a
 domain out of **web.archive.org** snapshots. Built for investigations
@@ -20,16 +20,16 @@ pip install -e .
 
 ```bash
 # Default scan: 5-minute timeout, contact-URL filter on.
-kronieker theranos.com
+kronikier theranos.com
 
 # How did one specific page evolve across snapshots?
-kronieker --single-url https://www.theranos.com/contact-us
+kronikier --single-url https://www.theranos.com/contact-us
 
 # Long-running thorough scan, every URL the host has.
-kronieker wirecard.com --exhaustive
+kronikier wirecard.com --exhaustive
 
 # Batch a list of targets.
-kronieker --targets-file targets.txt
+kronikier --targets-file targets.txt
 ```
 
 The first ever invocation runs a one-time latency calibration (~3-5 s,
@@ -101,7 +101,7 @@ the live site.
 
 Wayback snapshots are immutable, so rerunning the same scan can answer
 without spending more IA bytes. The CLI keeps an on-disk cache, **on by
-default**, at `~/.cache/kronieker/snapshots/`. One HTML file per
+default**, at `~/.cache/kronikier/snapshots/`. One HTML file per
 snapshot, browsable on disk, grouped by host.
 
 Disable with `--no-cache`. Wipe with `--clear-cache`.

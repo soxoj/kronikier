@@ -15,10 +15,10 @@ from typing import TYPE_CHECKING, Iterable, Iterator
 
 import requests
 
-from kronieker.cdx import DEFAULT_USER_AGENT, Snapshot
+from kronikier.cdx import DEFAULT_USER_AGENT, Snapshot
 
 if TYPE_CHECKING:
-    from kronieker.cache import SnapshotCache
+    from kronikier.cache import SnapshotCache
 
 log = logging.getLogger(__name__)
 
@@ -122,7 +122,7 @@ def fetch_snapshots(
         responses and triggers spurious retries. ``None`` (default) means
         "no deadline".
     cache:
-        Optional :class:`~kronieker.cache.SnapshotCache`. When provided we
+        Optional :class:`~kronikier.cache.SnapshotCache`. When provided we
         check it before issuing the HTTP request: hits are yielded
         synchronously (no executor, no rate-limit token, no IA bytes spent),
         misses go through the worker pool as usual and their successful

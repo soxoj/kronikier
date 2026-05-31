@@ -11,10 +11,10 @@ from __future__ import annotations
 
 import time
 
-from kronieker import pipeline as pipeline_mod
-from kronieker.calibration import Calibration, CALIBRATION_VERSION
-from kronieker.cdx import Snapshot
-from kronieker.fetcher import FetchedPage
+from kronikier import pipeline as pipeline_mod
+from kronikier.calibration import Calibration, CALIBRATION_VERSION
+from kronikier.cdx import Snapshot
+from kronikier.fetcher import FetchedPage
 
 
 def _calibration(avg: float = 0.001) -> Calibration:
@@ -40,7 +40,7 @@ def test_scan_stops_producing_when_deadline_passed(monkeypatch):
     """A short timeout + slow fetches → fetched count must stay well under
     the candidate count because the deadline cuts off producer dispatch."""
     candidates = [_fast_snapshot(i) for i in range(200)]
-    monkeypatch.setattr("kronieker.planner.show_num_pages", lambda *a, **kw: 350)
+    monkeypatch.setattr("kronikier.planner.show_num_pages", lambda *a, **kw: 350)
 
     def fake_query_domain(domain, **kwargs):
         return iter(candidates)
@@ -49,7 +49,7 @@ def test_scan_stops_producing_when_deadline_passed(monkeypatch):
     def slow_fetch(snap, session, timeout, retries):
         time.sleep(0.05)  # 50ms per fetch
         return FetchedPage(snap, 200, f"<html>hit-{snap.original}</html>")
-    monkeypatch.setattr("kronieker.fetcher._fetch_one", slow_fetch)
+    monkeypatch.setattr("kronikier.fetcher._fetch_one", slow_fetch)
 
     # Timeout 0.2s, workers=2 → capacity nominal would be huge but real wall
     # time only allows a handful of fetches before deadline.
@@ -76,7 +76,7 @@ def test_in_flight_fetches_complete_after_deadline_hit(monkeypatch):
     workers worth of fetches must complete, even though many more were queued.
     """
     candidates = [_fast_snapshot(i) for i in range(50)]
-    monkeypatch.setattr("kronieker.planner.show_num_pages", lambda *a, **kw: 350)
+    monkeypatch.setattr("kronikier.planner.show_num_pages", lambda *a, **kw: 350)
     monkeypatch.setattr(pipeline_mod, "query_domain",
                         lambda d, **kw: iter(candidates))
 
@@ -88,7 +88,7 @@ def test_in_flight_fetches_complete_after_deadline_hit(monkeypatch):
         time.sleep(0.05)
         completed["n"] += 1
         return FetchedPage(snap, 200, "<html>ok</html>")
-    monkeypatch.setattr("kronieker.fetcher._fetch_one", measured_fetch)
+    monkeypatch.setattr("kronikier.fetcher._fetch_one", measured_fetch)
 
     pipeline_mod.scan_domain(
         "big.example",
@@ -112,14 +112,14 @@ def test_in_flight_fetches_complete_after_deadline_hit(monkeypatch):
 def test_scan_result_marks_timeout_exhausted_true(monkeypatch):
     """When the scan stops because of the deadline, ScanResult.timeout_exhausted=True."""
     candidates = [_fast_snapshot(i) for i in range(100)]
-    monkeypatch.setattr("kronieker.planner.show_num_pages", lambda *a, **kw: 350)
+    monkeypatch.setattr("kronikier.planner.show_num_pages", lambda *a, **kw: 350)
     monkeypatch.setattr(pipeline_mod, "query_domain",
                         lambda d, **kw: iter(candidates))
 
     def slow_fetch(snap, session, timeout, retries):
         time.sleep(0.05)
         return FetchedPage(snap, 200, "<html>x</html>")
-    monkeypatch.setattr("kronieker.fetcher._fetch_one", slow_fetch)
+    monkeypatch.setattr("kronikier.fetcher._fetch_one", slow_fetch)
 
     result = pipeline_mod.scan_domain(
         "big.example",
@@ -139,11 +139,11 @@ def test_scan_result_marks_timeout_exhausted_true(monkeypatch):
 def test_unlimited_timeout_does_not_mark_exhausted(monkeypatch):
     """timeout=0 → scan completes naturally, timeout_exhausted stays False."""
     candidates = [_fast_snapshot(i) for i in range(3)]
-    monkeypatch.setattr("kronieker.planner.show_num_pages", lambda *a, **kw: 1)
+    monkeypatch.setattr("kronikier.planner.show_num_pages", lambda *a, **kw: 1)
     monkeypatch.setattr(pipeline_mod, "query_domain",
                         lambda d, **kw: iter(candidates))
     monkeypatch.setattr(
-        "kronieker.fetcher._fetch_one",
+        "kronikier.fetcher._fetch_one",
         lambda snap, sess, t, r: FetchedPage(snap, 200, "<html>ok</html>"),
     )
 

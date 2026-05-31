@@ -10,7 +10,7 @@ Design notes:
   pinned to historical timestamps. We never use "latest" — re-running the
   calibration two years from now should hit the same bytes, so the avg is
   stable across time and machines.
-- Cache file lives in ``$XDG_CACHE_HOME/kronieker/calibration.json``
+- Cache file lives in ``$XDG_CACHE_HOME/kronikier/calibration.json``
   (or ``~/.cache/...`` on macOS / Linux without XDG). Cache is regeneratable
   — that's the XDG distinction between cache vs config.
 - Real-run timings from production scans are deliberately *not* folded back
@@ -33,8 +33,8 @@ from pathlib import Path
 
 import requests
 
-from kronieker.cdx import DEFAULT_USER_AGENT, Snapshot
-from kronieker.fetcher import _fetch_one
+from kronikier.cdx import DEFAULT_USER_AGENT, Snapshot
+from kronikier.fetcher import _fetch_one
 
 log = logging.getLogger(__name__)
 
@@ -97,7 +97,7 @@ def cache_path() -> Path:
     Honors ``XDG_CACHE_HOME`` if set; otherwise falls back to ``~/.cache/``.
     """
     base = os.environ.get("XDG_CACHE_HOME") or str(Path.home() / ".cache")
-    return Path(base) / "kronieker" / "calibration.json"
+    return Path(base) / "kronikier" / "calibration.json"
 
 
 def _now_iso() -> str:

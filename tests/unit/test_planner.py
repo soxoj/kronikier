@@ -11,9 +11,9 @@ import math
 import pytest
 import requests
 
-from kronieker import planner as planner_mod
-from kronieker.classifier import CDX_URLKEY_FILTER
-from kronieker.planner import (
+from kronikier import planner as planner_mod
+from kronikier.classifier import CDX_URLKEY_FILTER
+from kronikier.planner import (
     SNAPS_PER_PAGE,
     ScanPlan,
     _effective_concurrency,
