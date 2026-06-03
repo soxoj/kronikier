@@ -364,20 +364,61 @@ def _looks_like_real_email(addr: str) -> bool:
     return True
 
 
+# Local-part words that are almost never real email mailboxes but are
+# extremely common in English/Russian prose right before " at " / " на "
+# (e.g. "Commercial support is available at nginx.com" gets the
+# at-deobfuscator turning it into "available@nginx.com"). When a candidate
+# email surfaces ONLY in the deobfuscated pass — i.e. it required ``at`` →
+# ``@`` substitution to be visible — and its local part is one of these
+# words, it's a deobfuscation artifact and we drop it. A real
+# ``available@example.com`` written plainly is caught by Pass 1 and kept.
+_PROSE_AT_STOPWORDS = frozenset({
+    "available", "archived", "based", "found", "headquartered",
+    "hosted", "listed", "located", "registered", "stationed",
+    "displayed", "offered", "presented", "showcased", "stored",
+    "published",
+})
+
+
 def extract_emails(content: str) -> Iterator[Contact]:
-    """Yield unique email Contacts from an HTML (or plain-text) page."""
+    """Yield unique email Contacts from an HTML (or plain-text) page.
+
+    Two passes — original normalized text, then a deobfuscated copy with
+    ``[at]`` / ``[dot]`` / bare-``at``/``dot`` rewrites applied. Pass 2 is
+    stricter: candidates whose local part is a prose stopword (and that
+    didn't already appear in Pass 1) are rejected as deobfuscation
+    artifacts rather than real mailboxes.
+    """
     text = _normalize_html(content)
     seen: set[str] = set()
-    for pass_text in (text, _deobfuscate_at_dot(text)):
-        for match in _EMAIL_RE.finditer(pass_text):
-            raw = match.group(1)
-            canonical = raw.lower().rstrip(".,;:")
-            if canonical in seen:
-                continue
-            if not _looks_like_real_email(canonical):
-                continue
-            seen.add(canonical)
-            yield Contact(kind="email", value=canonical, raw=raw)
+
+    # Pass 1: text as-is.
+    for match in _EMAIL_RE.finditer(text):
+        raw = match.group(1)
+        canonical = raw.lower().rstrip(".,;:")
+        if canonical in seen:
+            continue
+        if not _looks_like_real_email(canonical):
+            continue
+        seen.add(canonical)
+        yield Contact(kind="email", value=canonical, raw=raw)
+
+    # Pass 2: with at-/dot-deobfuscation. Stop-word filter kicks in only
+    # for matches that weren't already produced by Pass 1 — anything that
+    # came in cleanly is a real mailbox regardless of local-part text.
+    pass1_emails = set(seen)
+    for match in _EMAIL_RE.finditer(_deobfuscate_at_dot(text)):
+        raw = match.group(1)
+        canonical = raw.lower().rstrip(".,;:")
+        if canonical in seen:
+            continue
+        if not _looks_like_real_email(canonical):
+            continue
+        local = canonical.split("@", 1)[0]
+        if canonical not in pass1_emails and local in _PROSE_AT_STOPWORDS:
+            continue
+        seen.add(canonical)
+        yield Contact(kind="email", value=canonical, raw=raw)
 
 
 # ---------------------------------------------------------------------------

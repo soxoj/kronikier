@@ -138,6 +138,53 @@ class TestEmailExtraction:
         )]
         assert "info@www-staging.example.test" in emails, emails
 
+    def test_prose_at_pattern_does_not_become_email(self):
+        """English prose like ``"support is available at nginx.com"`` was
+        being turned into ``available@nginx.com`` by the at-deobfuscator.
+        Pass-2 stop-word filter rejects these prose artefacts.
+        """
+        prose_cases = [
+            "Commercial support is available at nginx.com.",
+            "Source code is hosted at github.test.",
+            "Documentation is found at docs.example.test.",
+            "Replicas are located at backup.example.test.",
+            "Mirror archived at archive.example.test.",
+            "Properly listed at directory.example.test.",
+            "Company headquartered at hq.example.test.",
+            "Domain registered at registrar.example.test.",
+        ]
+        for prose in prose_cases:
+            emails = [c.value for c in extract_emails(f"<p>{prose}</p>")]
+            assert emails == [], f"prose {prose!r} produced emails {emails!r}"
+
+    def test_real_email_with_stopword_local_in_pass1_is_kept(self):
+        """A real ``available@somecompany.test`` (mailto: or plain ``@``)
+        must NOT be filtered — the stop-word check applies only to Pass-2
+        deobfuscation outputs that didn't already surface in Pass 1.
+        """
+        html = (
+            '<a href="mailto:available@somecompany.test">Email us</a>'
+            "<p>Sales support is hosted at example.test.</p>"  # this is prose
+        )
+        emails = [c.value for c in extract_emails(html)]
+        assert "available@somecompany.test" in emails, emails
+        # The prose form must not have leaked.
+        assert "hosted@example.test" not in emails, emails
+
+    def test_legitimate_at_obfuscation_still_works(self):
+        """The stop-word filter must not break genuine obfuscated emails
+        whose local part isn't a prose stopword (``john at example.com``,
+        ``support at example.com``).
+        """
+        cases = [
+            ("Contact: john at example.test", "john@example.test"),
+            ("Email support at example.test", "support@example.test"),
+            ("Write to ivan (at) gazprom (dot) test", "ivan@gazprom.test"),
+        ]
+        for prose, expected in cases:
+            emails = [c.value for c in extract_emails(f"<p>{prose}</p>")]
+            assert expected in emails, f"missing {expected!r} in {emails!r}"
+
     def test_glued_text_after_inline_tags_does_not_extend_domain(self):
         """The wirecard.com regression: when an email is wrapped in
         inline elements followed immediately by more text (no whitespace
