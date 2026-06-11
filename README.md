@@ -1,11 +1,18 @@
 # kronikier
 
-OSINT tool that mines **historical** contacts (email, phone numbers) for a
-domain out of **web.archive.org** snapshots. Built for investigations
-where the current site no longer shows contact details (or shows
-different ones) but earlier versions are preserved in the archive.
+**🗄️ Get historical contacts for a website from web.archive.org snapshots**
+
+---
+
+_OSINT tool that mines **historical** contacts (email, phone numbers) for a
+domain out of **web.archive.org** snapshots._
+
+_Built for investigations where the current site no longer shows contact details (or shows
+different ones) but earlier versions are preserved in the archive._
 
 [![asciicast](https://github.com/user-attachments/assets/bc24bdd0-f483-41f5-82ae-cb0418f72389)](https://asciinema.org/a/kZErdPENZJlnSEjA)
+
+**WEB VERSION:** [kronikier-web](https://github.com/soxoj/kronikier-web).
 
 **Full docs:** [docs/USAGE.md](docs/USAGE.md) ·
 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
