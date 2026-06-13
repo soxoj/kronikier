@@ -150,7 +150,11 @@ The end-to-end test suite (`pytest -m e2e`) hits the live wayback for
 `theranos.com` and `enron.com` and asserts that the canonical contacts
 of both still surface — the OSINT use case is the regression test.
 
----
+## SOWEL classification
+
+OSINT techniques used:
+  - [SOTL-7.1. Check Archives](https://sowel.soxoj.com/check-archives)
+  - [SOTL-22.5. Extract Contacts From Page Text](https://sowel.soxoj.com/page-text-contacts)
 
 ## License
 
